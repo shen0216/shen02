@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>三角洲惩罚者·完全体｜自由地图+手动战报+历史击杀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c111c 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            padding: 1.5rem;
+            min-height: 100vh;
+            color: #eef2ff;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #ff3b3b, #f9a602, #8b0000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 8px rgba(255,50,30,0.4);
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+        }
+        .main-area {
+            flex: 2;
+            min-width: 280px;
+        }
+        .sidebar {
+            flex: 1.2;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+        /* 玩家卡片 */
+        .punisher-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .player-card {
+            background: rgba(18, 24, 36, 0.9);
+            border-radius: 1.5rem;
+            border: 1px solid #ff5a3266;
+            flex: 1;
+            min-width: 220px;
+            transition: 0.2s;
+        }
+        .player-card:hover { transform: translateY(-4px); border-color: #ff7b4a; }
+        .card-header {
+            background: #00000066;
+            padding: 0.7rem;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+            border-bottom: 2px solid #ff5a32;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .player-name-select {
+            background: #1e1e2a;
+            color: #ffd9b5;
+            border: 1px solid #ff884d;
+            border-radius: 32px;
+            padding: 4px 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .card-body { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .stat {
+            background: #0f1322;
+            border-radius: 1rem;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+        .stat-label { font-weight: 600; color: #ffb347; }
+        .bad-luck { background: #2a1a1f; border-left: 4px solid #ff4444; }
+        .war-room {
+            background: #0b0f17e6;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .war-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+        .map-info, .flash-info, .map-selector {
+            background: #00000055;
+            padding: 0.8rem;
+            border-radius: 1.2rem;
+            flex: 1;
+            min-width: 140px;
+        }
+        .info-title { font-size: 0.7rem; color: #ffaa77; letter-spacing: 1px; }
+        .info-content { font-size: 1.1rem; font-weight: bold; margin-top: 4px; word-break: break-word; }
+        .btn-punish {
+            background: radial-gradient(circle at 30% 10%, #ff4d2e, #a12200);
+            border: none;
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            width: 100%;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+            margin-top: 10px;
+            box-shadow: 0 5px 0 #4a1f0a;
+            transition: 0.07s linear;
+        }
+        .btn-punish:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a1f0a; }
+        .btn-save {
+            background: #2c5a2e;
+            box-shadow: 0 5px 0 #1a3a1a;
+        }
+        .verdict {
+            background: #020617cc;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #ffa559;
+        }
+        .verdict h3 { font-size: 1.2rem; color: #ff8159; margin-bottom: 8px; }
+        .manual-report {
+            width: 100%;
+            background: #0a0e1a;
+            border: 1px solid #ffa05e;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            color: #fff0dd;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        .editor-card, .history-card {
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #4a6a8e;
+        }
+        .card-title {
+            font-size: 1.2rem;
+            border-left: 5px solid #ff884d;
+            padding-left: 10px;
+            margin-bottom: 12px;
+        }
+        .map-item {
+            background: #1e2438;
+            margin-bottom: 12px;
+            border-radius: 1rem;
+            padding: 8px;
+        }
+        .map-name-input {
+            background: #0b0f1a;
+            border: 1px solid #ff884d;
+            color: #ffdebc;
+            padding: 4px 8px;
+            border-radius: 20px;
+            width: 60%;
+            font-weight: bold;
+        }
+        .coord-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .coord-tag {
+            background: #2a2e42;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .add-coord {
+            background: #2f5a3c;
+            border: none;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .del-map {
+            background: #771111;
+            border: none;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            cursor: pointer;
+            float: right;
+        }
+        .history-list {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+        .history-item {
+            background: #11161f;
+            border-radius: 1rem;
+            margin-bottom: 12px;
+            padding: 8px;
+            font-size: 0.75rem;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px dashed #ffae6e;
+            margin-bottom: 6px;
+        }
+        .kill-input {
+            width: 50px;
+            background: #010101;
+            color: #ffcc99;
+            border: 1px solid #ff984f;
+            border-radius: 12px;
+            text-align: center;
+        }
+        button.small {
+            background: #3a4e6b;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.7rem;
+        }
+        .clear-history {
+            background: #8b3c2c;
+            margin-top: 8px;
+            width: 100%;
+        }
+        footer { text-align: center; margin-top: 2rem; font-size: 0.7rem; opacity: 0.7; }
+        input, button, select, textarea { font-family: inherit; }
+        button { cursor: pointer; }
+        select option { background: #0f1322; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚡ 三角洲惩罚者·完全自定义 ⚡</h1>
+        <p>「自选地图 · 手动战报 · 历史击杀编辑」</p>
+    </div>
+    <div class="dashboard">
+        <div class="main-area">
+            <div class="punisher-grid" id="playersGrid"></div>
+            <div class="war-room">
+                <div class="war-flex">
+                    <div class="map-info">
+                        <div class="info-title">🗺️ 当前地图</div>
+                        <div class="info-content" id="mapName">—— 未开始 ——</div>
+                    </div>
+                    <div class="flash-info">
+                        <div class="info-title">⚡ 闪击坐标</div>
+                        <div class="info-content" id="flashPoint">⚡ 点击随机</div>
+                    </div>
+                    <div class="map-selector">
+                        <div class="info-title">🗺️ 自选地图</div>
+                        <select id="customMapSelect" style="background: #0b0f1a; color: #ffdebc; border: 1px solid #ff884d; border-radius: 20px; padding: 6px 12px; width: 100%; margin-top: 5px;">
+                            <option value="">-- 随机（默认）--</option>
+                        </select>
+                        <button id="applyMapBtn" style="background: #2f5a3c; border: none; color: white; border-radius: 20px; padding: 4px 12px; margin-top: 6px; width: 100%; cursor: pointer;">✅ 应用此地图</button>
+                    </div>
+                </div>
+                <button class="btn-punish" id="punishBtn">🎲 随机装备 & 地图坐标 🎲</button>
+            </div>
+            <div class="verdict">
+                <h3>📝 手动战报（自由填写）</h3>
+                <textarea id="manualReportInput" class="manual-report" rows="5" placeholder="在这里自由撰写本次惩罚战报...&#10;例如：阿强冲到加油站厕所被伏击，老张闪击钟楼顶摔成重伤，小陈全场ob零击杀……"></textarea>
+                <button class="btn-punish btn-save" id="saveRecordBtn">💾 保存本次记录到历史 💾</button>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="editor-card">
+                <div class="card-title">🗺️ 自定义地图+坐标</div>
+                <div id="mapEditorContainer" style="max-height: 350px; overflow-y: auto;"></div>
+                <button id="addNewMapBtn" style="background: #2c5a2e; width: 100%; margin-top: 8px; padding: 6px; border-radius: 40px;">+ 添加新地图</button>
+                <div style="font-size: 0.7rem; margin-top: 8px; color: #bdbdbd;">※ 每个地图可配多个坐标，随机抽取</div>
+            </div>
+            <div class="history-card">
+                <div class="card-title">📋 惩罚历史 (可编辑击杀)</div>
+                <div id="historyList" class="history-list">暂无记录</div>
+                <button id="clearAllHistory" class="small clear-history">🗑️ 清空全部历史</button>
+            </div>
+        </div>
+    </div>
+    <footer>⚙️ ① 点击随机按钮 → ② 填写战报 → ③ 保存记录 | 历史中可修改击杀数 | 右侧地图可自由增删坐标</footer>
+</div>
+
+<script>
+    // ======================== 全局数据 ========================
+    // 玩家可选名字池
+    const NAME_OPTIONS = [
+   "阿浅大王", "小应大魔王", "唐王PK", "糖糖鸡娃", "mkmkmk", "林好几亿", 
+    ];
+    let currentPlayers = [];  // 存储当前显示的玩家装备+名字
+    
+    // 武器库 & 诅咒库
+   const WEAPONS_PRIMARY = ["QBZ95-1","M4A1","AUG","K416","ASVal","KC17","AK-12","AKM","SG552","CAR-15","M16A4","AKS-74U","Ash-12","M7","SCAR-H","G3","PTR-32","腾龙突击步枪","Vector","勇士","P90","SMG-45","SR-3M","MP5","UZI","MP7","野牛","任意武器","SV98","M700","R93","SR-25","SVD","SKS","VSS","MINI-14","M14","PSG-1","SR9","M249","PKM","","M250","QJB-201","S12K","M1014","M870","725双管霰弹枪","G18",".357左轮","沙漠之鹰","93R","QSZ92G","G17","1911","M1911","G18全自动","M1911老古董"];
+       const WEAPONS_SECONDARY = ["红狼突进","威龙跃空","无名隐秘","疾风翻滚","露娜箭影","骇爪无声","银翼追踪","蜂医治疗","蛊雾致盲","比特骇侵","蝶舞魅影","回响激励","牧羊人布防","乌鲁鲁攻防","深蓝盾卫"];
+
+    const ARMORS = ["摩托马甲","尼龙防弹衣","轻型防弹衣","安保防弹衣","简易防刺服","TG战术防弹衣","通用战术背心","HT战术背心","制式防弹背心","HvK快拆防弹衣","TGH防弹衣","射手战术背心","MK2战术背心","DT-AVS防弹衣","突击手防弹背心","武士防弹背心","HNP特勤防弹衣"];
+    const ITEMS = ["老式钢盔","奔尼帽","户外棒球帽","安保头盔","复古摩托头盔","DRO战术头盔","MC防弹头盔","H01战术头盔","DICH训练头盔","GT1战术头盔","MHS战术头盔"];
+    const CURSES = ["无","禁止疼药","禁倍镜","禁连发","开局需负重","无","无","无","无","无","无","无","无","使用六倍以上倍镜","只能带车载急救包","每次换子弹都要不一样等级","无","无"];
+
+    // 地图数据结构
+    let mapsData = [];
+    // 历史记录
+    let historyRecords = [];
+
+    // localStorage key
+    const STORAGE_MAPS = "delta_punisher_maps";
+    const STORAGE_HISTORY = "delta_punisher_history";
+
+    // 当前展示的地图和坐标（用于保存）
+    let currentMapName = "";
+    let currentFlashSpot = "";
+
+    // 辅助函数
+    function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    // 生成单个玩家装备+诅咒
+    function generateRandomLoadout() {
+        return {
+            primary: randomItem(WEAPONS_PRIMARY),
+            secondary: randomItem(WEAPONS_SECONDARY),
+            armor: randomItem(ARMORS),
+            item: randomItem(ITEMS),
+            curse: randomItem(CURSES)
+        };
+    }
+    
+    // 获取下拉框中的名字
+    function getPlayerNameFromSelect(index) {
+        const select = document.getElementById(`playerNameSelect_${index}`);
+        return select ? select.value : NAME_OPTIONS[index % NAME_OPTIONS.length];
+    }
+    
+    // 刷新所有玩家的随机装备（保留当前下拉名字）
+    function randomizeAllLoadouts() {
+        for (let i = 0; i < 3; i++) {
+            const newLoad = generateRandomLoadout();
+            currentPlayers[i] = { ...newLoad, name: getPlayerNameFromSelect(i) };
+        }
+        renderPlayersCard();
+    }
+    
+    // 渲染三个玩家卡片
+    function renderPlayersCard() {
+        const grid = document.getElementById('playersGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const player = currentPlayers[i] || { primary: "?", secondary: "?", armor: "?", item: "?", curse: "?", name: NAME_OPTIONS[i] };
+            let optionsHtml = '';
+            NAME_OPTIONS.forEach(name => {
+                const selected = (player.name === name) ? 'selected' : '';
+                optionsHtml += `<option value="${name}" ${selected}>${name}</option>`;
+            });
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <span>玩家</span>
+                    <select id="playerNameSelect_${i}" class="player-name-select" data-index="${i}">
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="stat"><span class="stat-label">主武器</span><span class="stat-value">${escapeHtml(player.primary)}</span></div>
+                    <div class="stat"><span class="stat-label">干员</span><span class="stat-value">${escapeHtml(player.secondary)}</span></div>
+                    <div class="stat"><span class="stat-label">护甲</span><span class="stat-value">${escapeHtml(player.armor)}</span></div>
+                    <div class="stat"><span class="stat-label">头盔</span><span class="stat-value">${escapeHtml(player.item)}</span></div>
+                    <div class="stat bad-luck"><span class="stat-label">诅咒</span><span class="stat-value">${escapeHtml(player.curse)}</span></div>
+                </div>
+            `;
+            grid.appendChild(card);
+            const selectEl = document.getElementById(`playerNameSelect_${i}`);
+            if (selectEl) {
+                selectEl.addEventListener('change', (e) => {
+                    const newName = e.target.value;
+                    if (currentPlayers[i]) currentPlayers[i].name = newName;
+                    renderPlayersCard(); // 刷新显示
+                });
+            }
+        }
+    }
+    
+    // ========== 地图编辑器相关 ==========
+    function renderMapEditor() {
+        const container = document.getElementById('mapEditorContainer');
+        if (!container) return;
+        if (mapsData.length === 0) {
+            container.innerHTML = '<div style="padding: 8px; color: gray;">暂无地图，点击下方添加</div>';
+            updateCustomMapSelect();
+            return;
+        }
+        container.innerHTML = '';
+        mapsData.forEach((map, idx) => {
+            const mapDiv = document.createElement('div');
+            mapDiv.className = 'map-item';
+            mapDiv.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <input type="text" class="map-name-input" value="${escapeHtml(map.name)}" data-map-index="${idx}" data-field="name">
+                    <button class="del-map" data-map-index="${idx}">🗑️ 删图</button>
+                </div>
+                <div class="coord-list" id="coordList_${idx}">
+                    ${map.spots.map(spot => `<span class="coord-tag">📍 ${escapeHtml(spot)} <button class="del-coord" data-map="${idx}" data-coord="${escapeHtml(spot)}">✖</button></span>`).join('')}
+                </div>
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <input type="text" id="newCoord_${idx}" placeholder="新坐标名" style="flex:1; background:#0b0f1a; border:1px solid #ff884d; color:white; border-radius:16px; padding:4px 8px;">
+                    <button class="add-coord" data-map-index="${idx}">+ 添加坐标</button>
+                </div>
+            `;
+            container.appendChild(mapDiv);
+        });
+        // 地图名称修改
+        document.querySelectorAll('.map-name-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.mapIndex);
+                if (!isNaN(idx) && mapsData[idx]) {
+                    mapsData[idx].name = e.target.value;
+                    saveMapsToLocal();
+                    renderMapEditor();
+                }
+            });
+        });
+        // 删除地图
+        document.querySelectorAll('.del-map').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.mapIndex);
+                if (!isNaN(idx)) {
+                    mapsData.splice(idx, 1);
+                    saveMapsToLocal();
+                    renderMapEditor();
+                }
+            });
+        });
+        // 添加坐标
+        document.querySelectorAll('.add-coord').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.mapIndex);
+                const input = document.getElementById(`newCoord_${idx}`);
+                const newSpot = input.value.trim();
+                if (newSpot && mapsData[idx]) {
+                    mapsData[idx].spots.push(newSpot);
+                    saveMapsToLocal();
+                    renderMapEditor();
+                } else if (!newSpot) alert("坐标不能为空");
+            });
+        });
+        // 删除坐标
+        document.querySelectorAll('.del-coord').forEach(delBtn => {
+            delBtn.addEventListener('click', (e) => {
+                const mapIdx = parseInt(delBtn.dataset.map);
+                const coordName = delBtn.dataset.coord;
+                if (!isNaN(mapIdx) && mapsData[mapIdx]) {
+                    mapsData[mapIdx].spots = mapsData[mapIdx].spots.filter(s => s !== coordName);
+                    saveMapsToLocal();
+                    renderMapEditor();
+                }
+            });
+        });
+        updateCustomMapSelect(); // 同步自选下拉框
+    }
+    
+    function saveMapsToLocal() {
+        localStorage.setItem(STORAGE_MAPS, JSON.stringify(mapsData));
+    }
+    
+    function loadMapsFromLocal() {
+        const stored = localStorage.getItem(STORAGE_MAPS);
+        if (stored) {
+            try {
+                mapsData = JSON.parse(stored);
+                if (!Array.isArray(mapsData)) mapsData = [];
+                mapsData = mapsData.filter(m => m && typeof m.name === 'string' && Array.isArray(m.spots));
+                if (mapsData.length === 0) throw new Error();
+            } catch(e) { initDefaultMaps(); }
+        } else { initDefaultMaps(); }
+        renderMapEditor();
+    }
+    
+    function initDefaultMaps() {
+        mapsData = [
+            { name: "零号大坝", spots: ["行政楼西楼", "行政楼东楼", "集装箱", "水泥厂", "军营","游客中心", "大电", "西边撤离点", "东边撤离点"] },
+            { name: "长弓溪谷", spots: ["大坝排水口", "观测塔高台", "溪谷木桥", "废弃装甲车顶", "雷区边缘"] },
+            { name: "航天基地", spots: ["发射塔架顶端", "燃料库泄漏区", "地下通道死胡同", "指挥中心穹顶", "停机坪无掩体"] }
+        ];
+        saveMapsToLocal();
+    }
+    
+    // 随机地图坐标（完全随机）
+    function getRandomMapAndSpot() {
+        if (!mapsData.length) return { mapName: "无地图", flashSpot: "未知区域" };
+        const map = randomItem(mapsData);
+        if (!map.spots.length) return { mapName: map.name, flashSpot: "无坐标(请添加坐标)" };
+        const spot = randomItem(map.spots);
+        return { mapName: map.name, flashSpot: spot };
+    }
+    
+    // 更新自选地图下拉框
+    function updateCustomMapSelect() {
+        const select = document.getElementById('customMapSelect');
+        if (!select) return;
+        let options = '<option value="">-- 随机（默认）--</option>';
+        mapsData.forEach((map, idx) => {
+            options += `<option value="${idx}">${escapeHtml(map.name)}</option>`;
+        });
+        select.innerHTML = options;
+    }
+    
+    // 应用选中的地图（强制切换当前展示的地图坐标）
+    function applySelectedMap() {
+        const select = document.getElementById('customMapSelect');
+        const selectedIdx = select.value;
+        if (selectedIdx === "") {
+            // 随机模式：从所有地图中随机
+            const { mapName, flashSpot } = getRandomMapAndSpot();
+            currentMapName = mapName;
+            currentFlashSpot = flashSpot;
+            document.getElementById('mapName').innerText = mapName;
+            document.getElementById('flashPoint').innerHTML = `⚡ ${flashSpot} ⚡`;
+        } else {
+            const idx = parseInt(selectedIdx);
+            if (mapsData[idx] && mapsData[idx].spots.length > 0) {
+                const map = mapsData[idx];
+                const randomSpot = randomItem(map.spots);
+                currentMapName = map.name;
+                currentFlashSpot = randomSpot;
+                document.getElementById('mapName').innerText = map.name;
+                document.getElementById('flashPoint').innerHTML = `⚡ ${randomSpot} ⚡`;
+            } else {
+                alert("该地图没有坐标，请先添加坐标");
+            }
+        }
+    }
+    
+    // 随机装备 + 随机地图/坐标（完全随机，不依赖自选下拉）
+    function executeRandom() {
+        randomizeAllLoadouts();
+        const { mapName, flashSpot } = getRandomMapAndSpot();
+        currentMapName = mapName;
+        currentFlashSpot = flashSpot;
+        document.getElementById('mapName').innerText = mapName;
+        document.getElementById('flashPoint').innerHTML = `⚡ ${flashSpot} ⚡`;
+        // 不清空手动战报，保留已填内容
+    }
+    
+    // ========== 历史记录相关 ==========
+    function saveCurrentRecord() {
+        const playersSnapshot = [];
+        for (let i = 0; i < 3; i++) {
+            const p = currentPlayers[i];
+            if (!p) continue;
+            playersSnapshot.push({
+                name: p.name,
+                primary: p.primary,
+                secondary: p.secondary,
+                armor: p.armor,
+                item: p.item,
+                curse: p.curse,
+                kills: 0
+            });
+        }
+        const manualReport = document.getElementById('manualReportInput').value.trim();
+        if (!manualReport) {
+            alert("请填写战报内容后再保存！");
+            return;
+        }
+        if (!currentMapName || !currentFlashSpot) {
+            alert("请先点击「随机装备 & 地图坐标」或使用自选地图生成战场信息！");
+            return;
+        }
+        const record = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleString(),
+            mapName: currentMapName,
+            flashSpot: currentFlashSpot,
+            report: manualReport,
+            players: playersSnapshot
+        };
+        historyRecords.unshift(record);
+        if (historyRecords.length > 50) historyRecords.pop();
+        localStorage.setItem(STORAGE_HISTORY, JSON.stringify(historyRecords));
+        renderHistoryList();
+        alert("记录已保存！");
+    }
+    
+    function renderHistoryList() {
+        const historyContainer = document.getElementById('historyList');
+        if (!historyContainer) return;
+        if (historyRecords.length === 0) {
+            historyContainer.innerHTML = '<div style="padding: 8px; color: gray;">暂无惩罚记录</div>';
+            return;
+        }
+        historyContainer.innerHTML = '';
+        historyRecords.forEach((rec, idx) => {
+            const playersHtml = rec.players.map((p, pIdx) => `
+                <div style="display:flex; align-items:center; gap:6px; justify-content:space-between; margin-top:4px;">
+                    <span style="font-weight:bold;">${escapeHtml(p.name)}</span>
+                    <span style="font-size:0.65rem;">${escapeHtml(p.primary.split(' ')[0])}</span>
+                    <span>击杀: <input type="number" class="kill-input" data-record-idx="${idx}" data-player-idx="${pIdx}" value="${p.kills || 0}" style="width:55px;"></span>
+                </div>
+            `).join('');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'history-item';
+            itemDiv.innerHTML = `
+                <div class="history-header">
+                    <span>🕒 ${rec.timestamp}</span>
+                    <button class="small del-single" data-idx="${idx}">❌ 删除</button>
+                </div>
+                <div>🗺️ ${escapeHtml(rec.mapName)} | ⚡ ${escapeHtml(rec.flashSpot)}</div>
+                <div style="background:#0a0e1a; margin-top:6px; padding:4px; border-radius:8px; font-style:italic;">📖 ${escapeHtml(rec.report)}</div>
+                ${playersHtml}
+            `;
+            historyContainer.appendChild(itemDiv);
+        });
+        // 击杀修改事件
+        document.querySelectorAll('.kill-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const recIdx = parseInt(inp.dataset.recordIdx);
+                const playerIdx = parseInt(inp.dataset.playerIdx);
+                let newKills = parseInt(inp.value);
+                if (isNaN(newKills)) newKills = 0;
+                if (historyRecords[recIdx] && historyRecords[recIdx].players[playerIdx]) {
+                    historyRecords[recIdx].players[playerIdx].kills = newKills;
+                    localStorage.setItem(STORAGE_HISTORY, JSON.stringify(historyRecords));
+                }
+            });
+        });
+        // 删除单条记录
+        document.querySelectorAll('.del-single').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                if (!isNaN(idx)) {
+                    historyRecords.splice(idx, 1);
+                    localStorage.setItem(STORAGE_HISTORY, JSON.stringify(historyRecords));
+                    renderHistoryList();
+                }
+            });
+        });
+    }
+    
+    function loadHistoryFromLocal() {
+        const stored = localStorage.getItem(STORAGE_HISTORY);
+        if (stored) {
+            try {
+                historyRecords = JSON.parse(stored);
+                if (!Array.isArray(historyRecords)) historyRecords = [];
+            } catch(e) { historyRecords = []; }
+        } else { historyRecords = []; }
+        renderHistoryList();
+    }
+    
+    function clearAllHistory() {
+        if (confirm("确定清空所有历史记录吗？")) {
+            historyRecords = [];
+            localStorage.setItem(STORAGE_HISTORY, JSON.stringify(historyRecords));
+            renderHistoryList();
+        }
+    }
+    
+    // ========== 初始化 ==========
+    function init() {
+        loadMapsFromLocal();
+        loadHistoryFromLocal();
+        // 初始化三名玩家装备+默认名字
+        const defaultNames = NAME_OPTIONS.slice(0,3);
+        for (let i=0; i<3; i++) {
+            currentPlayers[i] = { ...generateRandomLoadout(), name: defaultNames[i] };
+        }
+        renderPlayersCard();
+        // 初始随机一组地图坐标
+        const { mapName, flashSpot } = getRandomMapAndSpot();
+        currentMapName = mapName;
+        currentFlashSpot = flashSpot;
+        document.getElementById('mapName').innerText = mapName;
+        document.getElementById('flashPoint').innerHTML = `⚡ ${flashSpot} ⚡`;
+        
+        // 绑定事件
+        document.getElementById('punishBtn').addEventListener('click', executeRandom);
+        document.getElementById('saveRecordBtn').addEventListener('click', saveCurrentRecord);
+        document.getElementById('addNewMapBtn').addEventListener('click', () => {
+            const newName = prompt("新地图名称", "新战场");
+            if (newName) {
+                mapsData.push({ name: newName, spots: ["默认落点1", "默认落点2"] });
+                saveMapsToLocal();
+                renderMapEditor();
+            }
+        });
+        document.getElementById('clearAllHistory').addEventListener('click', clearAllHistory);
+        document.getElementById('applyMapBtn').addEventListener('click', applySelectedMap);
+        updateCustomMapSelect();
+    }
+    
+    init();
+</script>
+</body>
+</html>
