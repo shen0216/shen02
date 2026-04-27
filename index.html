@@ -335,7 +335,8 @@
     const ARMORS = ["摩托马甲","尼龙防弹衣","轻型防弹衣","安保防弹衣","简易防刺服","TG战术防弹衣","通用战术背心","HT战术背心","制式防弹背心","HvK快拆防弹衣","TGH防弹衣","射手战术背心","MK2战术背心","DT-AVS防弹衣","突击手防弹背心","武士防弹背心","HNP特勤防弹衣"];
     const ITEMS = ["老式钢盔","奔尼帽","户外棒球帽","安保头盔","复古摩托头盔","DRO战术头盔","MC防弹头盔","H01战术头盔","DICH训练头盔","GT1战术头盔","MHS战术头盔"];
     const CURSES = ["无","禁止疼药","禁倍镜","禁连发","开局需负重","无","无","无","无","无","无","无","无","使用六倍以上倍镜","只能带车载急救包","每次换子弹都要不一样等级","无","无"];
-
+// 击杀奖励池（随机奖品，符合三角洲整活风格）
+    const KILL_REWARDS = ["下一把其他玩家给开房卡","下一把其他玩家上交所有小金","下一把其他玩家不能摸没摸过的容器","下一把队友起全装护自己","独享保险","享受1分钟赞美","下一把队友只能打金蛋","交换带入装备","算你厉害","下一把队友3分钟内不能开容器","下一把可以先吃前两个包","下一把队友给带装备","其他玩家不能摸没摸过的容器","下一把队友起全装护自己","独享保险","享受1分钟赞美","下一把队友只能打金蛋","交换带入装备","算你厉害","下一把队友3分钟内不能开容器","享受1分钟赞美"];
     // 地图数据结构
     let mapsData = [];
     // 历史记录
@@ -360,7 +361,8 @@
             secondary: randomItem(WEAPONS_SECONDARY),
             armor: randomItem(ARMORS),
             item: randomItem(ITEMS),
-            curse: randomItem(CURSES)
+            curse: randomItem(CURSES),
+			reward: randomItem(KILL_REWARDS) 
         };
     }
     
@@ -405,8 +407,9 @@
                     <div class="stat"><span class="stat-label">干员</span><span class="stat-value">${escapeHtml(player.secondary)}</span></div>
                     <div class="stat"><span class="stat-label">护甲</span><span class="stat-value">${escapeHtml(player.armor)}</span></div>
                     <div class="stat"><span class="stat-label">头盔</span><span class="stat-value">${escapeHtml(player.item)}</span></div>
-                    <div class="stat bad-luck"><span class="stat-label">诅咒</span><span class="stat-value">${escapeHtml(player.curse)}</span></div>
-                </div>
+                    <div class="stat"><span class="stat-label">诅咒</span><span class="stat-value">${escapeHtml(player.curse)}</span></div>
+                    <div class="stat"><span class="stat-label">击杀奖励</span><span class="stat-value">${escapeHtml(player.reward)}</span></div>
+				</div>
             `;
             grid.appendChild(card);
             const selectEl = document.getElementById(`playerNameSelect_${i}`);
